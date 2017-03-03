@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,8 +45,103 @@ namespace CommonLib.Database
         #region メソッド(public)
         public static Connection GetInstance()
         {
+            if(Instance == null) { Instance = new Connection(); }
             return Instance;
         }
+
+        public static DataTable ExecuteQuery(string sql)
+        {
+            if(conn == null) { Instance = new Connection(); }
+
+            var dt = new DataTable();
+            var cmd = new MySqlCommand(sql, conn);
+            var adapter = new MySqlDataAdapter();
+            try
+            {
+                adapter.SelectCommand = cmd;
+                adapter.Fill(dt);
+            }
+            catch (MySqlException ex)
+            {
+                throw new ApplicationException(ex.Message);
+            }
+            finally
+            {
+                cmd.Dispose();
+                adapter.Dispose();
+            }
+
+            return dt;
+        }
+
+        public static DataTable ExecuteQuery(string sql, SQLParameter param)
+        {
+            if(conn == null) { Instance = new Connection(); }
+
+            var dt = new DataTable();
+            var cmd = new MySqlCommand(sql, conn);
+            var adapter = new MySqlDataAdapter();
+            try
+            {
+                cmd.Prepare();
+                var dbparam = new MySqlParameter();
+                dbparam.ParameterName = param.ParameterName;
+                dbparam.MySqlDbType = param.DbType;
+                dbparam.Value = param.ParameterValue;
+                cmd.Parameters.Add(dbparam);
+
+                adapter.SelectCommand = cmd;
+                adapter.Fill(dt);
+            }
+            catch(MySqlException ex)
+            {
+                throw new ApplicationException(ex.Message);
+            }
+            finally
+            {
+                cmd.Dispose();
+                adapter.Dispose();
+            }
+
+            return dt;
+        }
+        
+        public static DataTable ExecuteQuery(string sql, List<SQLParameter> param)
+        {
+            if (conn == null) { Instance = new Connection(); }
+
+            var cmd = new MySqlCommand(sql);
+            var adapter = new MySqlDataAdapter();
+            var dt = new DataTable();
+            try
+            {
+                cmd.Prepare();
+                foreach(var p in param)
+                {
+                    cmd.Parameters.Add(
+                        new MySqlParameter()
+                        {
+                            ParameterName = p.ParameterName,
+                            MySqlDbType = p.DbType,
+                            Value = p.ParameterValue
+                        });
+                }
+
+                adapter.SelectCommand = cmd;
+                adapter.Fill(dt);
+            }
+            catch(MySqlException ex)
+            {
+                throw new ApplicationException(ex.Message);
+            }
+            finally
+            {
+                cmd.Dispose();
+                adapter.Dispose();
+            }
+            return dt;
+        }
+
         #endregion
     }
 }
