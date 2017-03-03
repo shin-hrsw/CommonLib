@@ -22,6 +22,22 @@ namespace CommonLib.Database
         {
             var bl = new MySqlConnectionStringBuilder();
             bl.ConnectionProtocol = MySqlConnectionProtocol.Tcp;
+            bl.Server = Properties.Settings.Default.DatabaseServer;
+            bl.Port = Properties.Settings.Default.DatabasePortNo;
+            bl.UserID = Properties.Settings.Default.DatabaseUser;
+            bl.Password = Properties.Settings.Default.DatabasePassword;
+            bl.Database = Properties.Settings.Default.DatabaseName;
+            bl.Pooling = true;
+            bl.ConnectionTimeout = 10;
+            bl.CharacterSet = "utf8";
+
+            conn = new MySqlConnection(bl.GetConnectionString(true));
+            try { conn.Open(); }
+            catch(MySqlException ex)
+            {
+                conn.Dispose();
+                throw new ApplicationException("データベースに接続できませんでした：" + ex.Message);
+            }
         }
         #endregion
 
