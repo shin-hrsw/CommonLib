@@ -142,6 +142,36 @@ namespace CommonLib.Database
             return dt;
         }
 
+        public void ExecuteNonQuery(string sql, List<SQLParameter> param)
+        {
+            var cmd = new MySqlCommand(sql, conn);
+            try
+            {
+                cmd.Prepare();
+                if (param != null)
+                {
+                    param.ForEach(x =>
+                    {
+                        cmd.Parameters.Add(
+                            new MySqlParameter()
+                            {
+                                ParameterName = x.ParameterName,
+                                MySqlDbType = x.DbType,
+                                Value = x.ParameterValue
+                            });
+                    });
+                }
+                cmd.ExecuteNonQuery();
+            }
+            catch (MySqlException ex)
+            {
+                throw new ApplicationException(ex.Message);
+            }
+            finally
+            {
+                cmd.Dispose();
+            }
+        }
         #endregion
     }
 }
