@@ -19,9 +19,9 @@ namespace CommonLib.Base
         private List<string> control_properties = new List<string>()
         { "TableName", "KeyInfomation", "UseAutoIncrement" };
 
-        private bool is_new;        // 新規データの場合にtrue
-        private bool is_changed;    // 変更された場合にtrue
-        private bool is_deleted;    // 削除された場合にtrue
+        private bool is_new = true;         // 新規データの場合にtrue
+        private bool is_changed = false;    // 変更された場合にtrue
+        private bool is_deleted = false;    // 削除された場合にtrue
         private string error;       // エラーが発生した場合に設定
 
         #region プロパティ(abstract)
@@ -52,7 +52,7 @@ namespace CommonLib.Base
         {
             if (this.is_new)
             {
-                return true;
+                return Insert();
             }
 
             if (this.is_changed)
@@ -119,7 +119,7 @@ namespace CommonLib.Base
             if (this.UseAutoIncrement)
             {
                 var id = int.Parse(Database.Connection.ExecuteScalar("SELECT last_insert_id()").ToString());
-                var p = ty.GetProperty(this.KeyInfomation[0].Name);
+                var p = ty.GetProperty(this.KeyInfomation.First().Key);
                 p.SetValue(this, id);
             }
 
