@@ -12,7 +12,7 @@ namespace CommonLib.Base
     /// <remarks>
     /// データベースのテーブルと1対1で対応(テーブルひとつにつきModelひとつ)
     /// </remarks>
-    abstract class ModelBase
+    public abstract class ModelBase
     {
         // 制御で使用するプロパティのリスト
         // "NotTableColumnAttribute"のような属性を作って制御してもいいが…
