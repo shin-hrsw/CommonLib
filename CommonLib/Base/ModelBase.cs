@@ -99,7 +99,7 @@ namespace CommonLib.Base
             foreach (var p in props)
             {
                 columns += p.Name + ", ";
-                par = "@" + p.Name + ", ";
+                par += "@" + p.Name + ", ";
                 param_list.Add(new Database.SQLParameter(
                     "@" + p.Name, p.GetType(), p.GetValue(this)));
             }
