@@ -114,14 +114,63 @@ namespace CommonLib.Base
             sql.Append(par);
             sql.Append(")");
 
-            Database.Connection.ExecuteNonQuery(sql.ToString(), param_list);
-            // AUTO_INCREMENT使用時は設定されたIDを主キーにセット
-            if (this.UseAutoIncrement)
+            try
             {
-                var id = int.Parse(Database.Connection.ExecuteScalar("SELECT last_insert_id()").ToString());
-                var p = ty.GetProperty(this.KeyInfomation.First().Key);
-                p.SetValue(this, id);
+                Database.Connection.ExecuteNonQuery(sql.ToString(), param_list);
+                // AUTO_INCREMENT使用時は設定されたIDを主キーにセット
+                if (this.UseAutoIncrement)
+                {
+                    var id = int.Parse(Database.Connection.ExecuteScalar("SELECT last_insert_id()").ToString());
+                    var p = ty.GetProperty(this.KeyInfomation.First().Key);
+                    p.SetValue(this, id);
+                }
             }
+            catch (Exception ex)
+            {
+                this.error = ex.Message;
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool Change()
+        {
+            Type ty = this.GetType();
+            // プロパティから列のリストを作成
+            // 制御用プロパティは除外
+            // 主キーはWhere句で使用するので対象にする
+            var props = ty.GetProperties().Where(x =>
+            {
+                if (this.control_properties.Contains(x.Name)) { return false; }
+                return true;
+            });
+
+            string set_clause = " SET ";
+            string where_clause = "";
+            bool is_first = true;
+            var param_list = new List<Database.SQLParameter>();
+            foreach(var p in props)
+            {
+                if (this.KeyInfomation.ContainsKey(p.Name))
+                {
+                    where_clause += is_first ? "WHERE " : " AND ";
+                    where_clause += p.Name + " = @" + p.Name;
+
+                    is_first = false;
+                }
+                else { set_clause += p.Name + " = @" + p.Name + ", "; }
+
+                param_list.Add(new Database.SQLParameter(p.Name, p.GetType(), p.GetValue(this)));
+            }
+            set_clause = set_clause.Substring(0, set_clause.Length - 2);
+
+            var sql = new StringBuilder("UPDATE ");
+            sql.Append(this.TableName);
+            sql.Append(set_clause);
+            sql.Append(where_clause);
+
+            Database.Connection.ExecuteNonQuery(sql.ToString(), param_list);
 
             return true;
         }
