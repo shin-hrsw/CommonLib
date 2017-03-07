@@ -110,7 +110,7 @@ namespace CommonLib.Database
         {
             if (conn == null) { Instance = new Connection(); }
 
-            var cmd = new MySqlCommand(sql);
+            var cmd = new MySqlCommand(sql, conn);
             var adapter = new MySqlDataAdapter();
             var dt = new DataTable();
             try
@@ -142,8 +142,10 @@ namespace CommonLib.Database
             return dt;
         }
 
-        public void ExecuteNonQuery(string sql, List<SQLParameter> param)
+        public static void ExecuteNonQuery(string sql, List<SQLParameter> param)
         {
+            if(conn == null) { Instance = new Connection(); }
+
             var cmd = new MySqlCommand(sql, conn);
             try
             {
@@ -170,6 +172,31 @@ namespace CommonLib.Database
             finally
             {
                 cmd.Dispose();
+            }
+        }
+
+        public static object ExecuteScalar(string sql)
+        {
+            if(conn == null) { Instance = new Connection(); }
+
+            var cmd = new MySqlCommand(sql, conn);
+            var adapter = new MySqlDataAdapter();
+            try
+            {
+                adapter.SelectCommand = cmd;
+                var dt = new DataTable();
+                adapter.Fill(dt);
+
+                return dt.Rows[0][0];
+            }
+            catch(MySqlException ex)
+            {
+                throw new ApplicationException(ex.Message);
+            }
+            finally
+            {
+                cmd.Dispose();
+                adapter.Dispose();
             }
         }
         #endregion
