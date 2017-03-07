@@ -19,10 +19,10 @@ namespace CommonLib.Base
         private List<string> control_properties = new List<string>()
         { "TableName", "KeyInfomation", "UseAutoIncrement" };
 
-        private bool is_new = true;         // 新規データの場合にtrue
-        private bool is_changed = false;    // 変更された場合にtrue
-        private bool is_deleted = false;    // 削除された場合にtrue
-        private string error;       // エラーが発生した場合に設定
+        protected bool is_new = true;       // 新規データの場合にtrue
+        protected bool is_changed = false;  // 変更された場合にtrue
+        protected bool is_deleted = false;  // 削除された場合にtrue
+        protected string error;       // エラーが発生した場合に設定
 
         #region プロパティ(abstract)
         /// <summary>
