@@ -56,14 +56,14 @@ namespace CommonLib.Base
                 return Insert();
             }
 
-            if (this.is_changed)
-            {
-                return Change();
-            }
-
             if (this.is_deleted)
             {
                 return Remove();
+            }
+
+            if (this.is_changed)
+            {
+                return Change();
             }
 
             // SQL発行の必要がない
