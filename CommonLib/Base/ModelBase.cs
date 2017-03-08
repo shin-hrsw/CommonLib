@@ -155,7 +155,7 @@ namespace CommonLib.Base
             {
                 if (this.KeyInfomation.ContainsKey(p.Name))
                 {
-                    where_clause += is_first ? "WHERE " : " AND ";
+                    where_clause += is_first ? " WHERE " : " AND ";
                     where_clause += p.Name + " = @" + p.Name;
 
                     is_first = false;
