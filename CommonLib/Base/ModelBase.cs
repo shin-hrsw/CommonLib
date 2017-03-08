@@ -63,11 +63,21 @@ namespace CommonLib.Base
 
             if (this.is_deleted)
             {
-                return true;
+                return Remove();
             }
 
             // SQL発行の必要がない
             return true;
+        }
+
+        /// <summary>
+        /// 削除フラグをセットする
+        /// </summary>
+        /// <remarks>実際の削除はUpdate時に行われる</remarks>
+        public void Delete()
+        {
+            // 削除フラグをセット
+            this.is_deleted = true;
         }
 
         public string GetError()
@@ -171,6 +181,39 @@ namespace CommonLib.Base
             sql.Append(set_clause);
             sql.Append(where_clause);
 
+            Database.Connection.ExecuteNonQuery(sql.ToString(), param_list);
+
+            return true;
+        }
+
+        private bool Remove()
+        {
+            // KeyInformationが登録されていない場合は例外を飛ばす
+            if (this.KeyInfomation.Count == 0)
+            {
+                throw new InvalidOperationException("キー情報が設定されていません");
+            }
+
+            var sql = new StringBuilder("DELETE FROM ");
+            sql.Append(this.TableName);
+            string where_clause = "";
+            bool is_first = true;
+            var param_list = new List<Database.SQLParameter>();
+            foreach(var kvp in this.KeyInfomation)
+            {
+                where_clause += is_first ? " WHERE " : " AND ";
+                where_clause += kvp.Key + " = @" + kvp.Key;
+                var p = this.GetType().GetProperty(kvp.Key);
+                var val = p.GetValue(this);
+                // 主キーに値が設定されていない場合は例外を飛ばす
+                if(val == null)
+                {
+                    throw new ArgumentNullException("主キーに値が設定されていません");
+                }
+                param_list.Add(
+                    new Database.SQLParameter(kvp.Key, p.PropertyType, val));
+                is_first = false;
+            }
             Database.Connection.ExecuteNonQuery(sql.ToString(), param_list);
 
             return true;
