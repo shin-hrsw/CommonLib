@@ -112,7 +112,7 @@ namespace CommonLib.Base
                 columns += p.Name + ", ";
                 par += "@" + p.Name + ", ";
                 param_list.Add(new Database.SQLParameter(
-                    "@" + p.Name, p.GetType(), p.GetValue(this)));
+                    "@" + p.Name, p.PropertyType, p.GetValue(this)));
             }
             columns = columns.Substring(0, columns.Length - 2);
             par = par.Substring(0, par.Length - 2);
@@ -172,7 +172,7 @@ namespace CommonLib.Base
                 }
                 else { set_clause += p.Name + " = @" + p.Name + ", "; }
 
-                param_list.Add(new Database.SQLParameter(p.Name, p.GetType(), p.GetValue(this)));
+                param_list.Add(new Database.SQLParameter(p.Name, p.PropertyType, p.GetValue(this)));
             }
             set_clause = set_clause.Substring(0, set_clause.Length - 2);
 
@@ -211,7 +211,7 @@ namespace CommonLib.Base
                     throw new ArgumentNullException("主キーに値が設定されていません");
                 }
                 param_list.Add(
-                    new Database.SQLParameter(kvp.Key, p.PropertyType, val));
+                    new Database.SQLParameter(kvp.Key, kvp.Value, val));
                 is_first = false;
             }
             Database.Connection.ExecuteNonQuery(sql.ToString(), param_list);
