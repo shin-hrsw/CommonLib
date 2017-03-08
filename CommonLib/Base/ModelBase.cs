@@ -231,7 +231,7 @@ namespace CommonLib.Base
                 });
                 foreach (var p in prop)
                 {
-                    var ty = p.GetType();
+                    var ty = p.PropertyType;
                     if (ty == typeof(string)) { p.SetValue(this, row.Field<string>(p.Name)); }
                     else if (ty == typeof(bool)) { p.SetValue(this, row.Field<bool>(p.Name)); }
                     else if (ty == typeof(int)) { p.SetValue(this, row.Field<int>(p.Name)); }
