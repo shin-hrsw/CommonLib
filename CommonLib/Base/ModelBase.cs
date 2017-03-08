@@ -58,7 +58,7 @@ namespace CommonLib.Base
 
             if (this.is_changed)
             {
-                return true;
+                return Change();
             }
 
             if (this.is_deleted)
