@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace CommonLib.Base
 {
@@ -11,6 +11,7 @@ namespace CommonLib.Base
     /// </summary>
     /// <remarks>
     /// データベースのテーブルと1対1で対応(テーブルひとつにつきModelひとつ)
+    /// テーブルの列はプロパティに対応するので名前、データ型を一致させること
     /// </remarks>
     public abstract class ModelBase
     {
@@ -173,6 +174,82 @@ namespace CommonLib.Base
             Database.Connection.ExecuteNonQuery(sql.ToString(), param_list);
 
             return true;
+        }
+        #endregion
+
+        #region メソッド(protected)
+        /// <summary>
+        /// テーブル検索
+        /// </summary>
+        /// <remarks>
+        /// KeyInformationで指定されているプロパティの値を使って検索する
+        /// </remarks>
+        protected void Retrieve()
+        {
+            // KeyInformationが登録されていない場合は例外を飛ばす
+            // キー情報無しで処理をするとテーブルのデータが全件取得されてしまうSQLになる
+            if (this.KeyInfomation.Count == 0)
+            {
+                throw new InvalidOperationException("キー情報が設定されていません");
+            }
+
+            bool is_first = true;
+            string where_clause = "";
+            var param_list = new List<Database.SQLParameter>();
+            var sql = new StringBuilder("SELECT * FROM ");
+            sql.Append(this.TableName);
+            foreach (var kvp in this.KeyInfomation)
+            {
+                // kvp.Key…主キーの列名、kvp.Value…主キーのデータ型
+                where_clause += is_first ? " WHERE " : " AND ";
+                where_clause += kvp.Key + " = @" + kvp.Key;
+
+                var prop = this.GetType().GetProperty(kvp.Key);
+                var value = prop.GetValue(this);
+                // 主キーに値が設定されていない場合は例外を飛ばす
+                if(value == null)
+                {
+                    throw new ArgumentException("主キーに値が設定されていません");
+                }
+
+                param_list.Add(
+                    new Database.SQLParameter("@" + kvp.Key, kvp.Value, value));
+                is_first = false;
+            }
+            sql.Append(where_clause);
+
+            var dt = Database.Connection.ExecuteQuery(sql.ToString(), param_list);
+            if(dt.Rows.Count == 1)
+            {
+                var row = dt.Rows[0];
+                // プロパティに値を設定していく。キー情報と制御用プロパティは除外する
+                var prop = this.GetType().GetProperties().Where(x =>
+                {
+                    if (this.KeyInfomation.ContainsKey(x.Name)) { return false; }
+                    if (this.control_properties.Contains(x.Name)) { return false; }
+                    return true;
+                });
+                foreach (var p in prop)
+                {
+                    var ty = p.GetType();
+                    if (ty == typeof(string)) { p.SetValue(this, row.Field<string>(p.Name)); }
+                    else if (ty == typeof(bool)) { p.SetValue(this, row.Field<bool>(p.Name)); }
+                    else if (ty == typeof(int)) { p.SetValue(this, row.Field<int>(p.Name)); }
+                    else if (ty == typeof(int?)) { p.SetValue(this, row.Field<int?>(p.Name)); }
+                    else if (ty == typeof(long)) { p.SetValue(this, row.Field<long>(p.Name)); }
+                    else if (ty == typeof(long?)) { p.SetValue(this, row.Field<long?>(p.Name)); }
+                    else if (ty == typeof(decimal)) { p.SetValue(this, row.Field<decimal>(p.Name)); }
+                    else if (ty == typeof(decimal?)) { p.SetValue(this, row.Field<decimal?>(p.Name)); }
+                    else if (ty == typeof(DateTime)) { p.SetValue(this, row.Field<DateTime>(p.Name)); }
+                    else if (ty == typeof(DateTime?)) { p.SetValue(this, row.Field<DateTime?>(p.Name)); }
+                    else if (ty == typeof(byte[])) { p.SetValue(this, row.Field<byte[]>(p.Name)); }
+                    else { throw new ApplicationException("予期しないデータ型です"); }
+                }
+            }
+            else
+            {
+                throw new KeyNotFoundException("指定されたデータが存在しません");
+            }
         }
         #endregion
     }
