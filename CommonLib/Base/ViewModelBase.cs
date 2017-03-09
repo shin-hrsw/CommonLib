@@ -95,7 +95,7 @@ namespace CommonLib.Base
         /// 更新対象のModel
         /// </summary>
         /// <remarks>設定忘れを防ぐために抽象プロパティにする</remarks>
-        protected abstract ModelBase Model { get; set; }
+        protected abstract ModelBase Model { get; }
         #endregion
 
         #region IDataErrorInfoの実装
