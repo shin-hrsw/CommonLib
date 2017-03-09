@@ -147,6 +147,13 @@ namespace CommonLib.Base
 
         private bool Change()
         {
+            // 主キーの情報が設定されていない場合は処理しない
+            if (this.KeyInfomation.Count == 0)
+            {
+                this.error = "主キーの情報が設定されていません";
+                return false;
+            }
+
             Type ty = this.GetType();
             // プロパティから列のリストを作成
             // 制御用プロパティは除外
@@ -181,17 +188,26 @@ namespace CommonLib.Base
             sql.Append(set_clause);
             sql.Append(where_clause);
 
-            Database.Connection.ExecuteNonQuery(sql.ToString(), param_list);
+            try
+            {
+                Database.Connection.ExecuteNonQuery(sql.ToString(), param_list);
+            }
+            catch (Exception ex)
+            {
+                this.error = ex.Message;
+                return false;
+            }
 
             return true;
         }
 
         private bool Remove()
         {
-            // KeyInformationが登録されていない場合は例外を飛ばす
+            // KeyInformationが登録されていない場合は処理しない
             if (this.KeyInfomation.Count == 0)
             {
-                throw new InvalidOperationException("キー情報が設定されていません");
+                this.error = "キー情報が設定されていません";
+                return false;
             }
 
             var sql = new StringBuilder("DELETE FROM ");
@@ -205,16 +221,25 @@ namespace CommonLib.Base
                 where_clause += kvp.Key + " = @" + kvp.Key;
                 var p = this.GetType().GetProperty(kvp.Key);
                 var val = p.GetValue(this);
-                // 主キーに値が設定されていない場合は例外を飛ばす
+                // 主キーに値が設定されていない場合は処理終了
                 if(val == null)
                 {
-                    throw new ArgumentNullException("主キーに値が設定されていません");
+                    this.error = "主キーに値が設定されていません";
+                    return false;
                 }
                 param_list.Add(
                     new Database.SQLParameter(kvp.Key, kvp.Value, val));
                 is_first = false;
             }
-            Database.Connection.ExecuteNonQuery(sql.ToString(), param_list);
+            try
+            {
+                Database.Connection.ExecuteNonQuery(sql.ToString(), param_list);
+            }
+            catch (Exception ex)
+            {
+                this.error = ex.Message;
+                return false;
+            }
 
             return true;
         }
