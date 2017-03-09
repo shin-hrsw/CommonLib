@@ -12,17 +12,90 @@ namespace CommonLib.Base
     /// </summary>
     /// <remarks>
     /// IDataErrorInfoインターフェースとINotifyPropertyChangedインターフェースを実装する。
-    /// DataBindingを行うクラスはこのクラスを継承する
+    /// DataBindingを行うクラスはこのクラスを継承する。
+    /// また、Modelのデータ整合性はViewModelでチェックすること。
     /// </remarks>
     public abstract class ViewModelBase : IDataErrorInfo, INotifyPropertyChanged
     {
-        private Dictionary<string, string> error_info;
+        protected Dictionary<string, string> error_info;
+
+        #region プロパティ
+        /// <summary>
+        /// エラーメッセージ
+        /// </summary>
+        public string ErrorMessage { get; protected set; }
+
+        /// <summary>
+        /// エラー有無
+        /// </summary>
+        public bool HasError
+        {
+            get
+            {
+                if (this.error_info.Count > 0) { return true; }
+                if (!string.IsNullOrWhiteSpace(this.Error)) { return true; }
+
+                return false;
+            }
+        }
+        #endregion
 
         #region コンストラクタ
         public ViewModelBase()
         {
             this.error_info = new Dictionary<string, string>();
         }
+        #endregion
+
+        #region メソッド(public)
+        public virtual bool Update()
+        {
+            this.ErrorMessage = string.Empty;
+
+            // 入力不備があれば処理しない
+            if (this.HasError)
+            {
+                this.ErrorMessage = SearchError();
+                return false;
+            }
+
+            if (!this.Model.Update())
+            {
+                this.ErrorMessage = this.Model.GetError();
+                return false;
+            }
+
+            return true;
+        }
+
+        public virtual void Delete()
+        {
+            this.Model.Delete();
+        }
+        #endregion
+
+        #region メソッド(protected)
+        protected string SearchError()
+        {
+            // 個別のプロパティについて入力不備があればそれを返す
+            if (this.error_info.Count > 0)
+            {
+                return this.error_info.First().Value;
+            }
+
+            // その他に入力不備があれば返す
+            if (string.IsNullOrWhiteSpace(this.Error)) { return this.Error; }
+
+            return null;
+        }
+        #endregion
+
+        #region abstractプロパティ
+        /// <summary>
+        /// 更新対象のModel
+        /// </summary>
+        /// <remarks>設定忘れを防ぐために抽象プロパティにする</remarks>
+        protected abstract ModelBase Model { get; set; }
         #endregion
 
         #region IDataErrorInfoの実装
