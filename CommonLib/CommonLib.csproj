@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Base\EditorBase.cs" />
     <Compile Include="Base\ModelBase.cs" />
     <Compile Include="Base\ViewModelBase.cs" />
     <Compile Include="Database\Connection.cs" />
