@@ -72,10 +72,8 @@ namespace CommonLib.Base
         {
             this.Model.Delete();
         }
-        #endregion
 
-        #region メソッド(protected)
-        protected string SearchError()
+        public string SearchError()
         {
             // 個別のプロパティについて入力不備があればそれを返す
             if (this.error_info.Count > 0)
