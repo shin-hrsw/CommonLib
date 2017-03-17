@@ -18,12 +18,26 @@ namespace CommonLib.Base
         // 制御で使用するプロパティのリスト
         // "NotTableColumnAttribute"のような属性を作って制御してもいいが…
         private List<string> control_properties = new List<string>()
-        { "TableName", "KeyInfomation", "UseAutoIncrement" };
+        { nameof(TableName), nameof(KeyInfomation), nameof(UseAutoIncrement) };
 
         protected bool is_new = true;       // 新規データの場合にtrue
         protected bool is_changed = false;  // 変更された場合にtrue
         protected bool is_deleted = false;  // 削除された場合にtrue
         protected string error;       // エラーが発生した場合に設定
+
+        #region プロパティ
+        public RowStatus Status
+        {
+            get
+            {
+                if (this.is_new) { return RowStatus.New; }
+                else if (this.is_changed) { return RowStatus.Changed; }
+                else if (this.is_deleted) { return RowStatus.Deleted; }
+
+                return RowStatus.Normal;
+            }
+        }
+        #endregion
 
         #region プロパティ(abstract)
         /// <summary>

@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="Base\EditorBase.cs" />
     <Compile Include="Base\ModelBase.cs" />
+    <Compile Include="Base\RowStatusEnum.cs" />
     <Compile Include="Base\ViewModelBase.cs" />
     <Compile Include="Database\Connection.cs" />
     <Compile Include="Database\SQLParameter.cs" />
