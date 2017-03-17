@@ -41,6 +41,12 @@ namespace CommonLib.Base
         public virtual void Delete(int idx)
         {
             if(idx < 0 || idx >= ViewModelList.Count) { return; }
+            if(ViewModelList[idx].Status == RowStatus.New)
+            {
+                ViewModelList.RemoveAt(idx);
+                return;
+            }
+
             ViewModelList[idx].Delete();
         }
         #endregion
