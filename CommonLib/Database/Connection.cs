@@ -199,6 +199,13 @@ namespace CommonLib.Database
                 adapter.Dispose();
             }
         }
+
+        public static MySqlTransaction BeginTransaction()
+        {
+            if(conn == null) { Instance = new Connection(); }
+            tran = conn.BeginTransaction();
+            return tran;
+        }
         #endregion
     }
 }
