@@ -21,6 +21,11 @@ namespace CommonLib.Base
 
         #region プロパティ
         /// <summary>
+        /// ステータス
+        /// </summary>
+        public RowStatus Status => this.Model.Status;
+
+        /// <summary>
         /// エラーメッセージ
         /// </summary>
         public string ErrorMessage { get; protected set; }
