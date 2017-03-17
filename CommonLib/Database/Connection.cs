@@ -200,11 +200,27 @@ namespace CommonLib.Database
             }
         }
 
-        public static MySqlTransaction BeginTransaction()
+        public static void BeginTransaction()
         {
             if(conn == null) { Instance = new Connection(); }
             tran = conn.BeginTransaction();
-            return tran;
+            return;
+        }
+
+        public static void Commit()
+        {
+            if(tran == null) { throw new InvalidOperationException("トランザクションが開始されていません"); }
+
+            tran.Commit();
+            tran = null;
+        }
+
+        public static void Rollback()
+        {
+            if(tran == null) { throw new InvalidOperationException("トランザクションが開始されていません"); }
+
+            tran.Rollback();
+            tran = null;
         }
         #endregion
     }
