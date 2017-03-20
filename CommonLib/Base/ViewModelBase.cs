@@ -33,7 +33,7 @@ namespace CommonLib.Base
         /// <summary>
         /// エラー有無
         /// </summary>
-        public bool HasError
+        public virtual bool HasError
         {
             get
             {
