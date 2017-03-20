@@ -333,6 +333,47 @@ namespace CommonLib.Base
                 throw new KeyNotFoundException("指定されたデータが存在しません");
             }
         }
+
+        /// <summary>
+        /// バイナリデータ読み込み
+        /// </summary>
+        /// <param name="colName">バイナリデータが保存されている列名</param>
+        /// <remarks>
+        /// バイナリデータが必要になったらこのメソッドで読み込む
+        /// colNameと同じ名前のプロパティ(byte[]型)が存在すること
+        /// </remarks>
+        protected void LoadBlob(string colName)
+        {
+            var blob = this.GetType().GetProperty(colName);
+            if (blob == null) { throw new InvalidOperationException("バイナリを受け取るプロパティが存在しません"); }
+            else if(blob.PropertyType != typeof(byte[]))
+            {
+                throw new InvalidOperationException("バイナリを受け取るデータ型はbyte[]のみです");
+            }
+
+            var sql = new StringBuilder("SELECT ");
+            sql.Append(colName);
+            sql.Append(" FROM ");
+            sql.Append(this.TableName);
+
+            string where_clause = "";
+            bool is_first = true;
+            var par = new List<Database.SQLParameter>();
+            foreach(var k in this.KeyInfomation)
+            {
+                where_clause += is_first ? " WHERE " : " AND ";
+                where_clause += k.Key + " = @" + k.Key;
+
+                var v = this.GetType().GetProperty(k.Key).GetValue(this);
+                par.Add(new Database.SQLParameter("@" + k.Key, k.Value, v));
+
+                is_first = false;
+            }
+            sql.Append(where_clause);
+
+            var dt = Database.Connection.ExecuteQuery(sql.ToString(), par);
+            blob.SetValue(this, dt.Rows[0].Field<byte[]>(colName));
+        }
         #endregion
     }
 }
