@@ -15,9 +15,9 @@ namespace CommonLib.Base
     /// </remarks>
     public abstract class ModelBase
     {
-        // 制御で使用するプロパティのリスト
-        // "NotTableColumnAttribute"のような属性を作って制御してもいいが…
-        private List<string> control_properties = new List<string>()
+        // 更新対象にしないプロパティを設定する
+        // BLOBなど、必要に応じてデータが設定されるプロパティに対して使用する
+        protected List<string> exclude_properties = new List<string>()
         { nameof(TableName), nameof(KeyInfomation), nameof(UseAutoIncrement) };
 
         protected bool is_new = true;       // 新規データの場合にtrue
@@ -110,7 +110,7 @@ namespace CommonLib.Base
             var props = ty.GetProperties()
                 .Where(x =>
                 {
-                    if (this.control_properties.Contains(x.Name)) { return false; }
+                    if (this.exclude_properties.Contains(x.Name)) { return false; }
                     if (this.UseAutoIncrement)
                     {
                         if (this.KeyInfomation.ContainsKey(x.Name)) { return false; }
@@ -174,7 +174,7 @@ namespace CommonLib.Base
             // 主キーはWhere句で使用するので対象にする
             var props = ty.GetProperties().Where(x =>
             {
-                if (this.control_properties.Contains(x.Name)) { return false; }
+                if (this.exclude_properties.Contains(x.Name)) { return false; }
                 return true;
             });
 
@@ -308,7 +308,7 @@ namespace CommonLib.Base
                 var prop = this.GetType().GetProperties().Where(x =>
                 {
                     if (this.KeyInfomation.ContainsKey(x.Name)) { return false; }
-                    if (this.control_properties.Contains(x.Name)) { return false; }
+                    if (this.exclude_properties.Contains(x.Name)) { return false; }
                     return true;
                 });
                 foreach (var p in prop)
