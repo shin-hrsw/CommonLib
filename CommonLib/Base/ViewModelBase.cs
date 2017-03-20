@@ -33,7 +33,7 @@ namespace CommonLib.Base
         /// <summary>
         /// エラー有無
         /// </summary>
-        public virtual bool HasError
+        public bool HasError
         {
             get
             {
@@ -107,7 +107,7 @@ namespace CommonLib.Base
             get { return this.error_info.ContainsKey(columnName) ? this.error_info[columnName] : null; }
         }
 
-        public string Error
+        public virtual string Error
         {
             get { return null; }
         }
