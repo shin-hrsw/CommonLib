@@ -18,7 +18,7 @@ namespace CommonLib.Base
         // 更新対象にしないプロパティを設定する
         // BLOBなど、必要に応じてデータが設定されるプロパティに対して使用する
         protected List<string> exclude_properties = new List<string>()
-        { nameof(TableName), nameof(KeyInfomation), nameof(UseAutoIncrement) };
+        { nameof(TableName), nameof(KeyInfomation), nameof(UseAutoIncrement), nameof(Status) };
 
         protected bool is_new = true;       // 新規データの場合にtrue
         protected bool is_changed = false;  // 変更された場合にtrue
